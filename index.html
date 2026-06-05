@@ -1,0 +1,1127 @@
+﻿<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Daily Faroese Connections</title>
+    <script>
+        window.tailwind = window.tailwind || {};
+        window.tailwind.config = { darkMode: 'class' };
+    </script>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        /* Custom animations */
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-6px); }
+            75% { transform: translateX(6px); }
+        }
+        .shake-animation {
+            animation: shake 0.2s ease-in-out 2;
+        }
+        @keyframes bounce-short {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-8px); }
+        }
+        .bounce-animation {
+            animation: bounce-short 0.3s ease-in-out;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-100 min-h-screen transition-colors duration-300 flex flex-col justify-between">
+
+    <script>
+        let CATEGORIES_DATA = [];
+        let FAROESE_DICTIONARY = {};
+    </script>
+
+    <!-- Confetti Overlay Canvas -->
+    <canvas id="confetti-canvas" class="fixed inset-0 pointer-events-none z-50 w-full h-full"></canvas>
+
+    <!-- Header Section -->
+    <header class="border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 px-4 py-3 sticky top-0 z-40 shadow-sm transition-colors duration-300">
+        <div class="max-w-4xl mx-auto flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <!-- Faroese Flag Design SVG Icon -->
+                <div class="w-10 h-7 rounded border border-slate-300 dark:border-slate-700 flex relative overflow-hidden flex-shrink-0">
+                    <div class="absolute inset-0 bg-white"></div>
+                    <div class="absolute h-full w-2 bg-blue-600 left-[30%]"></div>
+                    <div class="absolute w-full h-2 bg-blue-600 top-[40%]"></div>
+                    <div class="absolute h-full w-1 bg-red-600 left-[32%]"></div>
+                    <div class="absolute w-full h-1 bg-red-600 top-[45%]"></div>
+                </div>
+                <div>
+                    <h1 class="text-lg sm:text-2xl font-extrabold tracking-tight flex items-center gap-1.5">
+                        F&Oslash;ROYAR <span class="text-blue-600 dark:text-blue-400">CONNECTIONS</span>
+                    </h1>
+                    <p class="text-[10px] sm:text-xs text-slate-500 dark:text-slate-400 font-medium">Daily & Unlimited Faroese Word Puzzle</p>
+                </div>
+            </div>
+
+            <div class="flex items-center space-x-2">
+                <!-- Help Button -->
+                <button id="btn-help" class="p-2 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition" title="How to Play">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                </button>
+                <!-- Dictionary Button -->
+                <button id="btn-dictionary" class="p-2 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition" title="Faroese Cultural Dictionary">
+                    <span class="text-base" aria-hidden="true">&#128214;</span>
+                </button>
+                <!-- Stats Button -->
+                <button id="btn-stats" class="p-2 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition" title="Your Stats">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
+                </button>
+                <!-- Dark Mode Toggle -->
+                <button id="btn-theme-toggle" class="p-2 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition" title="Toggle Theme">
+                    <!-- Sun -->
+                    <svg id="theme-sun" class="w-5 h-5 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364-6.364l-.707.707M6.343 17.657l-.707.707m12.728 0l-.707-.707M6.343 6.343l-.707-.707M12 8a4 4 0 100 8 4 4 0 000-8z"></path></svg>
+                    <!-- Moon -->
+                    <svg id="theme-moon" class="w-5 h-5 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-4xl w-full mx-auto px-4 py-6 flex-grow flex flex-col items-center justify-start gap-6">
+        
+        <!-- Game mode toggle and Date info -->
+        <div class="w-full flex flex-col sm:flex-row items-center justify-between gap-3 bg-white dark:bg-slate-950 p-3 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-800">
+            <div class="flex items-center space-x-1 bg-slate-100 dark:bg-slate-900 p-1 rounded-xl">
+                <button id="mode-daily" class="px-4 py-1.5 text-xs sm:text-sm font-semibold rounded-lg transition duration-200 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 shadow-sm">
+                    Daily Puzzle
+                </button>
+                <button id="mode-practice" class="px-4 py-1.5 text-xs sm:text-sm font-semibold rounded-lg transition duration-200 text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200">
+                    Practice Mode
+                </button>
+            </div>
+            <div class="text-center sm:text-right">
+                <span id="game-date-display" class="text-xs sm:text-sm font-semibold text-slate-600 dark:text-slate-300 bg-blue-50 dark:bg-blue-950/40 text-blue-700 dark:text-blue-300 px-3 py-1 rounded-full border border-blue-100 dark:border-blue-900/30">
+                    June 5, 2026
+                </span>
+            </div>
+        </div>
+
+        <!-- System Message / Toast Notification panel -->
+        <div id="toast-banner" class="hidden w-full max-w-lg bg-indigo-600 text-white text-center py-2.5 px-4 rounded-xl shadow-md font-semibold text-sm transition-all duration-300">
+            One word away!
+        </div>
+
+        <!-- Confirmed Categories Board (Displays completed connections) -->
+        <div id="solved-categories-container" class="w-full max-w-xl flex flex-col gap-2">
+            <!-- Dynamically populated completed connection rows -->
+        </div>
+
+        <!-- Active Board of 16 Cards -->
+        <div id="grid-container" class="w-full max-w-xl grid grid-cols-4 gap-2 sm:gap-3 aspect-square sm:aspect-auto">
+            <!-- Dynamically populated 16 word tiles -->
+        </div>
+
+        <div class="w-full max-w-xl flex flex-col items-center gap-5 mt-2">
+            
+            <!-- Mistakes Indicator -->
+            <div class="flex flex-col items-center gap-2">
+                <span class="text-xs font-bold uppercase tracking-widest text-slate-500 dark:text-slate-400">
+                    Mistakes remaining:
+                </span>
+                <div id="mistakes-container" class="flex gap-2 text-2xl">
+                    <!-- Sheep icons representing lives -->
+                    <span class="bounce-animation">&#128017;</span>
+                    <span class="bounce-animation">&#128017;</span>
+                    <span class="bounce-animation">&#128017;</span>
+                    <span class="bounce-animation">&#128017;</span>
+                </div>
+            </div>
+
+            <!-- Game actions row -->
+            <div class="flex flex-wrap items-center justify-center gap-3 w-full">
+                <button id="btn-shuffle" class="px-5 py-2.5 rounded-full border-2 border-slate-300 dark:border-slate-700 font-semibold text-sm hover:bg-slate-100 dark:hover:bg-slate-800 transition active:scale-95 flex items-center gap-1.5">
+                    Shuffle
+                </button>
+                <button id="btn-deselect" class="px-5 py-2.5 rounded-full border-2 border-slate-300 dark:border-slate-700 font-semibold text-sm hover:bg-slate-100 dark:hover:bg-slate-800 transition active:scale-95">
+                    Deselect All
+                </button>
+                <button id="btn-submit" disabled class="px-6 py-2.5 rounded-full bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 font-bold text-sm disabled:opacity-40 disabled:cursor-not-allowed transition hover:opacity-90 active:scale-95">
+                    Submit Match
+                </button>
+            </div>
+
+            <!-- Next Practice Game Trigger -->
+            <button id="btn-next-practice" class="hidden px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-extrabold text-sm rounded-full shadow-lg hover:shadow-xl transition transform hover:-translate-y-0.5 active:translate-y-0 active:scale-95">
+                Next Random Puzzle
+            </button>
+        </div>
+
+        <div id="cultural-insights-box" class="w-full max-w-xl hidden mt-4 bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-slate-950 dark:to-slate-900 p-5 rounded-2xl border border-blue-200 dark:border-blue-900/40 shadow-sm">
+            <h3 class="font-bold text-slate-900 dark:text-indigo-300 flex items-center gap-2 mb-3 text-sm sm:text-base">
+                <span>&#127467;&#127476;</span> Faroese Cultural Dictionary
+            </h3>
+            <p class="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed mb-3">
+                Connections in the Faroe Islands are both literal (subsea tunnels, remote ferries) and historical! Select a solved connection to read about its cultural background.
+            </p>
+            <div id="insights-list" class="space-y-2.5">
+                <!-- Dynamically populated educational briefs -->
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer credits -->
+    <footer class="text-center py-6 border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 mt-12 transition-colors duration-300">
+        <p class="text-xs text-slate-500 dark:text-slate-400">
+            Developed by <a href="https://www.smyrilline.fo/" target="_blank" rel="noopener noreferrer" class="font-semibold text-blue-600 dark:text-blue-400 hover:underline">Smyrilline</a> for travelers to learn about the Faroe Islands better.
+        </p>
+    </footer>
+
+    <!-- Help Modal -->
+    <div id="modal-help" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 hidden">
+        <div class="bg-white dark:bg-slate-950 w-full max-w-md rounded-2xl p-6 shadow-2xl border border-slate-200 dark:border-slate-800 transform scale-95 transition-all duration-300">
+            <div class="flex justify-between items-start mb-4">
+                <h3 class="text-lg sm:text-xl font-extrabold text-slate-900 dark:text-slate-50">How to Play Connections</h3>
+                <button class="close-modal p-1.5 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+            <div class="space-y-3 text-xs sm:text-sm text-slate-600 dark:text-slate-300">
+                <p>Find groups of four items that share something in common.</p>
+                <p class="font-semibold text-slate-800 dark:text-slate-100">Rules:</p>
+                <ul class="list-disc pl-5 space-y-1">
+                    <li>Select four words and tap <span class="font-bold">"Submit Match"</span>.</li>
+                    <li>If incorrect, you lose one of your 4 sheep (<span class="text-base">&#128017;</span>).</li>
+                    <li>If you are only one word off, the game will notify you!</li>
+                    <li>Solve the puzzle with fewer than 4 mistakes to win!</li>
+                </ul>
+                <div class="bg-slate-100 dark:bg-slate-900 p-3 rounded-xl space-y-2 mt-4">
+                    <p class="font-bold text-slate-800 dark:text-slate-200">Difficulty levels:</p>
+                    <div class="flex items-center gap-2"><div class="w-4 h-4 rounded bg-amber-400"></div> <span><span class="font-semibold">Yellow</span>: Straightforward (Clubs, Clothes, News)</span></div>
+                    <div class="flex items-center gap-2"><div class="w-4 h-4 rounded bg-emerald-500"></div> <span><span class="font-semibold">Green</span>: Medium (Music, Towns, Mountains)</span></div>
+                    <div class="flex items-center gap-2"><div class="w-4 h-4 rounded bg-blue-500"></div> <span><span class="font-semibold">Blue</span>: Harder (Islands, Lakes, Tech)</span></div>
+                    <div class="flex items-center gap-2"><div class="w-4 h-4 rounded bg-purple-500"></div> <span><span class="font-semibold">Purple</span>: Tricky (Trp-offs, Wordplay, Flags)</span></div>
+                </div>
+            </div>
+            <button class="close-modal mt-5 w-full py-2.5 bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 font-bold text-sm rounded-xl">
+                Got it, let's play!
+            </button>
+        </div>
+    </div>
+
+    <!-- Stats & Share Results Modal -->
+    <div id="modal-stats" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 hidden">
+        <div class="bg-white dark:bg-slate-950 w-full max-w-md rounded-2xl p-6 shadow-2xl border border-slate-200 dark:border-slate-800 transform scale-95 transition-all duration-300">
+            <div class="flex justify-between items-start mb-4">
+                <h3 id="stats-title" class="text-lg sm:text-xl font-extrabold text-slate-900 dark:text-slate-50">Faroese Connections Stats</h3>
+                <button class="close-modal p-1.5 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+            
+            <div class="space-y-5">
+                <!-- Quick Stat Metrics Grid -->
+                <div class="grid grid-cols-4 gap-2 text-center">
+                    <div class="bg-slate-100 dark:bg-slate-900 p-2.5 rounded-xl">
+                        <span id="stat-played" class="block text-lg sm:text-2xl font-black text-indigo-600 dark:text-indigo-400">0</span>
+                        <span class="text-[9px] uppercase tracking-wider text-slate-500 font-bold">Played</span>
+                    </div>
+                    <div class="bg-slate-100 dark:bg-slate-900 p-2.5 rounded-xl">
+                        <span id="stat-winpct" class="block text-lg sm:text-2xl font-black text-emerald-600 dark:text-emerald-400">0%</span>
+                        <span class="text-[9px] uppercase tracking-wider text-slate-500 font-bold">Win %</span>
+                    </div>
+                    <div class="bg-slate-100 dark:bg-slate-900 p-2.5 rounded-xl">
+                        <span id="stat-streak" class="block text-lg sm:text-2xl font-black text-amber-500">0</span>
+                        <span class="text-[9px] uppercase tracking-wider text-slate-500 font-bold">Current Streak</span>
+                    </div>
+                    <div class="bg-slate-100 dark:bg-slate-900 p-2.5 rounded-xl">
+                        <span id="stat-maxstreak" class="block text-lg sm:text-2xl font-black text-purple-500">0</span>
+                        <span class="text-[9px] uppercase tracking-wider text-slate-500 font-bold">Max Streak</span>
+                    </div>
+                </div>
+
+                <!-- Game Result Grid Visualizer -->
+                <div id="modal-share-visualizer" class="hidden flex flex-col items-center bg-slate-50 dark:bg-slate-900/60 p-4 rounded-xl border border-slate-200/60 dark:border-slate-800">
+                    <p class="text-xs font-bold text-slate-500 mb-2 uppercase tracking-wider">Your Guess Path</p>
+                    <div id="share-grid-emojis" class="flex flex-col gap-1.5 mb-4">
+                        <!-- Filled with colored square emojis on daily completion -->
+                    </div>
+                    <button id="btn-copy-share" class="w-full flex items-center justify-center gap-2 py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm rounded-xl shadow transition transform active:scale-95">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"></path></svg>
+                        <span>Copy Share Text</span>
+                    </button>
+                    <p id="share-copy-indicator" class="text-xs text-emerald-500 font-semibold mt-1.5 hidden">Copied to clipboard!</p>
+                </div>
+
+                <div class="text-center text-xs text-slate-500 dark:text-slate-400">
+                    Play the Daily Mode to accumulate streaks and compare scores!
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Cultural Dictionary List Modal -->
+    <div id="modal-dictionary" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 hidden">
+        <div class="bg-white dark:bg-slate-950 w-full max-w-lg rounded-2xl p-6 shadow-2xl border border-slate-200 dark:border-slate-800 flex flex-col max-h-[85vh] transform scale-95 transition-all duration-300">
+            <div class="flex justify-between items-start mb-4">
+                <h3 class="text-lg sm:text-xl font-extrabold text-slate-900 dark:text-slate-50">Faroese Cultural Encyclopedia</h3>
+                <button class="close-modal p-1.5 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+            
+            <p class="text-xs text-slate-500 dark:text-slate-400 mb-4 leading-relaxed">
+                Discover the meanings behind famous islands, traditional dishes, sports clubs, and cultural hallmarks mentioned in the game!
+            </p>
+
+            <div class="overflow-y-auto space-y-3 pr-2 flex-grow scrollbar-thin scrollbar-thumb-slate-200">
+                <div id="dictionary-list" class="space-y-2.5">
+                    <p class="text-xs text-slate-500 dark:text-slate-400">Loading dictionary...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Native Synthesizer to make clean non-abrasive blips without asset downloads
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        
+        function playTone(freq, type, duration) {
+            try {
+                if (audioCtx.state === 'suspended') {
+                    audioCtx.resume();
+                }
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = type || 'sine';
+                osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+                gain.gain.setValueAtTime(0.12, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start();
+                osc.stop(audioCtx.currentTime + duration);
+            } catch (e) {
+                console.log("Audio not allowed or blocked by policy");
+            }
+        }
+
+        function playSuccessSound() {
+            // Arpeggio
+            setTimeout(() => playTone(330, 'triangle', 0.2), 0);   // E4
+            setTimeout(() => playTone(440, 'triangle', 0.2), 80);  // A4
+            setTimeout(() => playTone(554.37, 'triangle', 0.2), 160); // C#5
+            setTimeout(() => playTone(659.25, 'triangle', 0.4), 240); // E5
+        }
+
+        function playSelectSound() {
+            playTone(400, 'sine', 0.08);
+        }
+
+        function playDeselectSound() {
+            playTone(320, 'sine', 0.08);
+        }
+
+        function playWarningSound() {
+            playTone(220, 'sawtooth', 0.15);
+            setTimeout(() => playTone(220, 'sawtooth', 0.15), 180);
+        }
+
+        function playGameOverSound() {
+            playTone(300, 'sawtooth', 0.25);
+            setTimeout(() => playTone(260, 'sawtooth', 0.25), 150);
+            setTimeout(() => playTone(200, 'sawtooth', 0.4), 300);
+        }
+
+        function playVictorySound() {
+            playSuccessSound();
+            setTimeout(() => {
+                playTone(554.37, 'triangle', 0.15);
+                setTimeout(() => playTone(659.25, 'triangle', 0.15), 100);
+                setTimeout(() => playTone(880, 'triangle', 0.5), 200);
+            }, 400);
+        }
+
+        // Seed-based selection for predictable daily game
+        function getSeedForDate(date) {
+            const year = date.getFullYear();
+            const month = date.getMonth();
+            const day = date.getDate();
+            return year * 10000 + (month + 1) * 100 + day;
+        }
+
+        // LCG deterministic random number generator
+        function pseudorandom(seed) {
+            const x = Math.sin(seed++) * 10000;
+            return x - Math.floor(x);
+        }
+
+        // Helper to shuffle arrays
+        function seededShuffle(array, seed) {
+            let m = array.length, t, i;
+            let currentSeed = seed;
+            while (m) {
+                currentSeed = (currentSeed * 9301 + 49297) % 233280;
+                i = Math.floor((currentSeed / 233280) * m--);
+                t = array[m];
+                array[m] = array[i];
+                array[i] = t;
+            }
+            return array;
+        }
+
+        // Standard Fisher-Yates shuffle for practice mode
+        function standardShuffle(array) {
+            let currentIndex = array.length, randomIndex;
+            while (currentIndex != 0) {
+                randomIndex = Math.floor(Math.random() * currentIndex);
+                currentIndex--;
+                [array[currentIndex], array[randomIndex]] = [array[randomIndex], array[currentIndex]];
+            }
+            return array;
+        }
+
+        // State machine variables
+        let isDailyMode = true;
+        let selectedCategories = []; // The 4 selected category objects
+        let wordsOnBoard = [];       // Shuffled 16 words with category meta
+        let currentlySelected = [];  // Current selection of words (max 4)
+        let solvedCategories = [];   // List of solved category objects
+        let mistakesRemaining = 4;
+        let guessHistory = [];       // Track guesses as color-square rows for sharing.
+        let isGameOver = false;
+
+        // Stat persistent records keys
+        const DAILY_SOLVED_KEY = "faroese_connections_daily_solved_key_2026";
+        const DAILY_LAST_PLAYED_DATE = "faroese_connections_last_played_date";
+        const STATS_KEY = "faroese_connections_user_stats_v1";
+
+        function escapeHTML(value) {
+            return String(value).replace(/[&<>"']/g, char => ({
+                "&": "&amp;",
+                "<": "&lt;",
+                ">": "&gt;",
+                '"': "&quot;",
+                "'": "&#039;"
+            })[char]);
+        }
+
+        async function loadGameData() {
+            const response = await fetch("./data.json", { cache: "no-cache" });
+            if (!response.ok) {
+                throw new Error(`Unable to load data.json (${response.status})`);
+            }
+
+            const data = await response.json();
+            if (!Array.isArray(data.categories) || typeof data.dictionary !== "object" || data.dictionary === null) {
+                throw new Error("data.json must include categories and dictionary fields.");
+            }
+
+            CATEGORIES_DATA = data.categories;
+            FAROESE_DICTIONARY = data.dictionary;
+            renderDictionaryModal();
+        }
+
+        function renderDictionaryModal() {
+            const list = document.getElementById("dictionary-list");
+            if (!list) return;
+
+            const entries = Object.entries(FAROESE_DICTIONARY);
+            if (entries.length === 0) {
+                list.innerHTML = `<p class="text-xs text-slate-500 dark:text-slate-400">No dictionary entries available.</p>`;
+                return;
+            }
+
+            list.innerHTML = entries.map(([word, desc]) => `
+                <div class="p-3 bg-slate-50 dark:bg-slate-900 rounded-xl border border-slate-100 dark:border-slate-800">
+                    <div class="font-bold text-sm text-blue-600 dark:text-indigo-400 uppercase tracking-wider">${escapeHTML(word)}</div>
+                    <div class="text-xs text-slate-600 dark:text-slate-300 mt-1 leading-relaxed">${escapeHTML(desc)}</div>
+                </div>
+            `).join("");
+        }
+
+        function showDataLoadError(error) {
+            console.error(error);
+            showToast("Could not load puzzle data. Please refresh the page.", 6000);
+            document.getElementById("btn-shuffle").disabled = true;
+            document.getElementById("btn-deselect").disabled = true;
+            document.getElementById("btn-submit").disabled = true;
+        }
+
+        // Picks 4 categories: exactly 1 yellow, 1 green, 1 blue, 1 purple
+        function selectFourCategories(seed) {
+            const yellowPool = CATEGORIES_DATA.filter(c => c.difficulty === 'yellow');
+            const greenPool = CATEGORIES_DATA.filter(c => c.difficulty === 'green');
+            const bluePool = CATEGORIES_DATA.filter(c => c.difficulty === 'blue');
+            const purplePool = CATEGORIES_DATA.filter(c => c.difficulty === 'purple');
+
+            let yellowIndex, greenIndex, blueIndex, purpleIndex;
+
+            if (seed) {
+                // Seeded randomized index pick
+                yellowIndex = Math.floor(pseudorandom(seed) * yellowPool.length);
+                greenIndex = Math.floor(pseudorandom(seed + 1) * greenPool.length);
+                blueIndex = Math.floor(pseudorandom(seed + 2) * bluePool.length);
+                purpleIndex = Math.floor(pseudorandom(seed + 3) * purplePool.length);
+            } else {
+                // Completely random index pick
+                yellowIndex = Math.floor(Math.random() * yellowPool.length);
+                greenIndex = Math.floor(Math.random() * greenPool.length);
+                blueIndex = Math.floor(Math.random() * bluePool.length);
+                purpleIndex = Math.floor(Math.random() * purplePool.length);
+            }
+
+            return [
+                yellowPool[yellowIndex],
+                greenPool[greenIndex],
+                bluePool[blueIndex],
+                purplePool[purpleIndex]
+            ];
+        }
+
+        function initGame() {
+            // Reset state
+            currentlySelected = [];
+            solvedCategories = [];
+            mistakesRemaining = 4;
+            guessHistory = [];
+            isGameOver = false;
+
+            document.getElementById("btn-next-practice").classList.add("hidden");
+            document.getElementById("btn-shuffle").disabled = false;
+            document.getElementById("btn-deselect").disabled = false;
+            document.getElementById("btn-submit").disabled = true;
+
+            // Generate daily key
+            const today = new Date();
+            const todayStr = today.toLocaleDateString("en-US", { year: 'numeric', month: 'long', day: 'numeric' });
+            document.getElementById("game-date-display").textContent = todayStr;
+
+            if (isDailyMode) {
+                const seed = getSeedForDate(today);
+                selectedCategories = selectFourCategories(seed);
+                
+                // Assemble and shuffle board
+                let rawWords = [];
+                selectedCategories.forEach(cat => {
+                    cat.words.forEach(w => {
+                        rawWords.push({ text: w, categoryId: cat.id, difficulty: cat.difficulty });
+                    });
+                });
+                wordsOnBoard = seededShuffle(rawWords, seed);
+
+                // Restore previous state if daily already solved
+                checkDailyAlreadyCompleted(todayStr);
+            } else {
+                // Practice mode
+                selectedCategories = selectFourCategories();
+                let rawWords = [];
+                selectedCategories.forEach(cat => {
+                    cat.words.forEach(w => {
+                        rawWords.push({ text: w, categoryId: cat.id, difficulty: cat.difficulty });
+                    });
+                });
+                wordsOnBoard = standardShuffle(rawWords);
+                document.getElementById("game-date-display").textContent = "Practice Game";
+            }
+
+            // Clear visual panels
+            document.getElementById("insights-list").innerHTML = "";
+            document.getElementById("cultural-insights-box").classList.add("hidden");
+
+            renderBoard();
+            updateMistakesUI();
+        }
+
+        function renderBoard() {
+            const gridContainer = document.getElementById("grid-container");
+            gridContainer.innerHTML = "";
+
+            // Redraw Solved Row Banners
+            const solvedContainer = document.getElementById("solved-categories-container");
+            solvedContainer.innerHTML = "";
+
+            solvedCategories.forEach(cat => {
+                const row = document.createElement("div");
+                let bgStyle, textColor;
+                
+                if (cat.difficulty === 'yellow') {
+                    bgStyle = "bg-amber-400 dark:bg-amber-500 text-slate-900";
+                } else if (cat.difficulty === 'green') {
+                    bgStyle = "bg-emerald-500 dark:bg-emerald-600 text-white";
+                } else if (cat.difficulty === 'blue') {
+                    bgStyle = "bg-blue-500 dark:bg-blue-600 text-white";
+                } else {
+                    bgStyle = "bg-purple-500 dark:bg-purple-600 text-white";
+                }
+
+                row.className = `${bgStyle} w-full p-4 rounded-xl text-center shadow-sm flex flex-col justify-center items-center transition duration-500 transform scale-100 hover:scale-[1.01] cursor-pointer`;
+                
+                // Format display words
+                const wordsList = cat.words.join(', ');
+                row.innerHTML = `
+                    <div class="text-[10px] sm:text-xs uppercase tracking-widest font-extrabold opacity-90">${cat.title}</div>
+                    <div class="text-sm sm:text-lg font-bold mt-1 tracking-wide">${wordsList}</div>
+                `;
+
+                // Quick educational trigger when clicking solved categories
+                row.addEventListener("click", () => {
+                    revealCategoryCulturalFacts(cat);
+                });
+
+                solvedContainer.appendChild(row);
+                
+                // Automatically display culture insights once a category is solved
+                revealCategoryCulturalFacts(cat);
+            });
+
+            // Redraw Remaining Active Word Tiles
+            const activeWords = wordsOnBoard.filter(w => !solvedCategories.some(cat => cat.id === w.categoryId));
+
+            activeWords.forEach(word => {
+                const card = document.createElement("button");
+                const isSelected = currentlySelected.includes(word);
+                
+                // Card baseline style
+                let styleStr = "aspect-square sm:aspect-video flex items-center justify-center p-2 rounded-xl text-[10px] sm:text-sm font-bold tracking-tight text-center border shadow-sm transition-all duration-200 active:scale-95 break-words uppercase overflow-hidden ";
+                
+                if (isSelected) {
+                    styleStr += "bg-slate-800 text-white border-slate-900 dark:bg-indigo-600 dark:text-white dark:border-indigo-700 ring-2 ring-indigo-400 dark:ring-indigo-300";
+                } else {
+                    styleStr += "bg-white dark:bg-slate-950 text-slate-800 dark:text-slate-100 border-slate-200 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-900";
+                }
+
+                card.className = styleStr;
+                card.textContent = word.text;
+                
+                // Auto scale font-size for very long words to prevent overflow
+                if (word.text.length > 10) {
+                    card.classList.add("text-[8px]", "sm:text-xs");
+                    card.classList.remove("text-[10px]", "sm:text-sm");
+                }
+
+                card.addEventListener("click", () => handleTileClick(word, card));
+                gridContainer.appendChild(card);
+            });
+
+            // Adjust Submit Button Status
+            const submitBtn = document.getElementById("btn-submit");
+            submitBtn.disabled = currentlySelected.length !== 4 || isGameOver;
+        }
+
+        function handleTileClick(word, cardElement) {
+            if (isGameOver) return;
+
+            const index = currentlySelected.indexOf(word);
+            if (index > -1) {
+                // Deselect
+                currentlySelected.splice(index, 1);
+                playDeselectSound();
+            } else {
+                // Select only up to 4
+                if (currentlySelected.length >= 4) {
+                    playTone(200, "sine", 0.1);
+                    return;
+                }
+                currentlySelected.push(word);
+                playSelectSound();
+                // Add minor bounce animation visually
+                cardElement.classList.add("bounce-animation");
+                setTimeout(() => cardElement.classList.remove("bounce-animation"), 300);
+            }
+            renderBoard();
+        }
+
+        function shuffleBoard() {
+            if (isGameOver) return;
+            wordsOnBoard = standardShuffle([...wordsOnBoard]);
+            playSelectSound();
+            renderBoard();
+        }
+
+        function deselectAll() {
+            if (currentlySelected.length === 0 || isGameOver) return;
+            currentlySelected = [];
+            playDeselectSound();
+            renderBoard();
+        }
+
+        // Show toast alerts
+        function showToast(message, duration = 3000) {
+            const toast = document.getElementById("toast-banner");
+            toast.textContent = message;
+            toast.classList.remove("hidden");
+            setTimeout(() => {
+                toast.classList.add("hidden");
+            }, duration);
+        }
+
+        function submitGuess() {
+            if (currentlySelected.length !== 4 || isGameOver) return;
+
+            const matchCatId = currentlySelected[0].categoryId;
+            const isMatchAll = currentlySelected.every(w => w.categoryId === matchCatId);
+            
+            // Record guess row representation color emojis
+            let emojiRow = "";
+            currentlySelected.forEach(w => {
+                if (w.difficulty === 'yellow') emojiRow += "\uD83D\uDFE8";
+                else if (w.difficulty === 'green') emojiRow += "\uD83D\uDFE9";
+                else if (w.difficulty === 'blue') emojiRow += "\uD83D\uDFE6";
+                else emojiRow += "\uD83D\uDFEA";
+            });
+            guessHistory.push(emojiRow);
+
+            if (isMatchAll) {
+                // Category completed!
+                const solvedCat = selectedCategories.find(c => c.id === matchCatId);
+                solvedCategories.push(solvedCat);
+                currentlySelected = [];
+                playSuccessSound();
+
+                renderBoard();
+
+                // Check Win condition
+                if (solvedCategories.length === 4) {
+                    triggerEndGame(true);
+                }
+            } else {
+                // Check if they were "One word away"
+                // Group guess selections by categoryId
+                const countMap = {};
+                currentlySelected.forEach(w => {
+                    countMap[w.categoryId] = (countMap[w.categoryId] || 0) + 1;
+                });
+                const counts = Object.values(countMap);
+                const isOneAway = counts.includes(3);
+
+                // Apply shake feedback animations to selected grid blocks
+                const gridElements = document.getElementById("grid-container").children;
+                // Since remaining tiles are at play, we match visually with currentlySelected text
+                for (let elem of gridElements) {
+                    if (currentlySelected.some(w => w.text === elem.textContent)) {
+                        elem.classList.add("shake-animation", "border-red-500", "dark:border-red-500");
+                        setTimeout(() => elem.classList.remove("shake-animation", "border-red-500", "dark:border-red-500"), 500);
+                    }
+                }
+
+                // Deduct mistake
+                mistakesRemaining--;
+                updateMistakesUI();
+                playWarningSound();
+
+                if (isOneAway) {
+                    showToast("One away...", 2500);
+                } else {
+                    showToast("No match!", 2000);
+                }
+
+                // Lose condition check
+                if (mistakesRemaining === 0) {
+                    triggerEndGame(false);
+                }
+            }
+        }
+
+        function updateMistakesUI() {
+            const container = document.getElementById("mistakes-container");
+            container.innerHTML = "";
+            for (let i = 0; i < 4; i++) {
+                const sheep = document.createElement("span");
+                if (i < mistakesRemaining) {
+                    sheep.textContent = "\uD83D\uDC11";
+                    sheep.className = "transition-all duration-300 transform scale-100 bounce-animation";
+                } else {
+                    sheep.textContent = "\u25CB";
+                    sheep.className = "opacity-25 transform scale-75 grayscale";
+                }
+                container.appendChild(sheep);
+            }
+        }
+
+        // Adds dictionary card explainers as you discover connections
+        function revealCategoryCulturalFacts(category) {
+            const box = document.getElementById("cultural-insights-box");
+            box.classList.remove("hidden");
+
+            const list = document.getElementById("insights-list");
+            
+            // Check if this category explanation was already outputted to prevent duplicates
+            const existingId = `insight-item-${category.id}`;
+            if (document.getElementById(existingId)) return;
+
+            // Select color marker
+            let badgeColor;
+            if (category.difficulty === 'yellow') badgeColor = "bg-amber-400 text-slate-900";
+            else if (category.difficulty === 'green') badgeColor = "bg-emerald-500 text-white";
+            else if (category.difficulty === 'blue') badgeColor = "bg-blue-500 text-white";
+            else badgeColor = "bg-purple-500 text-white";
+
+            const container = document.createElement("div");
+            container.id = existingId;
+            container.className = "p-3 bg-white dark:bg-slate-900/40 rounded-xl border border-slate-200/50 dark:border-slate-800 flex flex-col gap-2 transition duration-300 hover:shadow-sm";
+
+            let detailsHTML = "";
+            category.words.forEach(w => {
+                if (FAROESE_DICTIONARY[w]) {
+                    detailsHTML += `<p class="text-xs leading-relaxed text-slate-600 dark:text-slate-300"><strong class="text-blue-600 dark:text-indigo-400 uppercase font-bold text-[11px]">${w}:</strong> ${FAROESE_DICTIONARY[w]}</p>`;
+                }
+            });
+
+            // If no individual word has a dictionary item, offer a generic description fallback
+            if (detailsHTML === "") {
+                detailsHTML = `<p class="text-xs italic text-slate-500 dark:text-slate-400">Discovering connections inside the Category of ${category.title}. Learn more about specific elements by opening the Encyclopedia up top.</p>`;
+            }
+
+            container.innerHTML = `
+                <div class="flex items-center gap-2">
+                    <span class="text-[9px] px-2 py-0.5 font-bold uppercase tracking-wider rounded-full ${badgeColor}">${category.difficulty}</span>
+                    <h4 class="font-bold text-xs sm:text-sm text-slate-800 dark:text-slate-100">${category.title}</h4>
+                </div>
+                <div class="space-y-1.5 border-t border-slate-100 dark:border-slate-800/60 pt-2">
+                    ${detailsHTML}
+                </div>
+            `;
+
+            // Append at top
+            list.insertBefore(container, list.firstChild);
+        }
+
+        function triggerEndGame(hasWon) {
+            isGameOver = true;
+            document.getElementById("btn-shuffle").disabled = true;
+            document.getElementById("btn-deselect").disabled = true;
+            document.getElementById("btn-submit").disabled = true;
+
+            if (isDailyMode) {
+                // Save Completion State
+                const todayStr = new Date().toLocaleDateString("en-US", { year: 'numeric', month: 'long', day: 'numeric' });
+                localStorage.setItem(DAILY_SOLVED_KEY, "true");
+                localStorage.setItem(DAILY_LAST_PLAYED_DATE, todayStr);
+                
+                // Track & Save Stats records
+                recordCompletionStats(hasWon);
+            } else {
+                // Practice Mode allows instantaneous continuation
+                document.getElementById("btn-next-practice").classList.remove("hidden");
+            }
+
+            if (hasWon) {
+                playVictorySound();
+                showToast("Gratulerer! You solved the puzzle!", 5000);
+                startConfettiEffect();
+            } else {
+                playGameOverSound();
+                showToast("Ska\u00F0a! Game Over. Revealing answers...", 5000);
+                
+                // Solve the rest automatically to teach the player
+                setTimeout(() => {
+                    selectedCategories.forEach(cat => {
+                        if (!solvedCategories.some(sc => sc.id === cat.id)) {
+                            solvedCategories.push(cat);
+                        }
+                    });
+                    renderBoard();
+                }, 1500);
+            }
+
+            // Launch stats share visualizer automatically on completion
+            setTimeout(() => {
+                showStatsModal();
+            }, 2500);
+        }
+
+        function recordCompletionStats(hasWon) {
+            let stats = JSON.parse(localStorage.getItem(STATS_KEY)) || {
+                played: 0,
+                won: 0,
+                streak: 0,
+                maxStreak: 0,
+                history: []
+            };
+
+            const todayStr = new Date().toLocaleDateString("en-US", { year: 'numeric', month: 'long', day: 'numeric' });
+            
+            // Check if played today already to avoid double scoring stats
+            if (stats.history.includes(todayStr)) return;
+
+            stats.played += 1;
+            stats.history.push(todayStr);
+
+            if (hasWon) {
+                stats.won += 1;
+                stats.streak += 1;
+                if (stats.streak > stats.maxStreak) {
+                    stats.maxStreak = stats.streak;
+                }
+            } else {
+                stats.streak = 0;
+            }
+
+            localStorage.setItem(STATS_KEY, JSON.stringify(stats));
+        }
+
+        function checkDailyAlreadyCompleted(todayStr) {
+            const lastPlayed = localStorage.getItem(DAILY_LAST_PLAYED_DATE);
+            const isSolved = localStorage.getItem(DAILY_SOLVED_KEY);
+            
+            if (lastPlayed === todayStr && isSolved === "true") {
+                // Lock board, autofill completed elements
+                isGameOver = true;
+                solvedCategories = [...selectedCategories];
+                document.getElementById("btn-shuffle").disabled = true;
+                document.getElementById("btn-deselect").disabled = true;
+                document.getElementById("btn-submit").disabled = true;
+                showToast("Daily puzzle completed already! Check back tomorrow.", 4000);
+            }
+        }
+
+        function showStatsModal() {
+            const stats = JSON.parse(localStorage.getItem(STATS_KEY)) || {
+                played: 0, won: 0, streak: 0, maxStreak: 0, history: []
+            };
+
+            document.getElementById("stat-played").textContent = stats.played;
+            const winPct = stats.played > 0 ? Math.round((stats.won / stats.played) * 100) : 0;
+            document.getElementById("stat-winpct").textContent = winPct + "%";
+            document.getElementById("stat-streak").textContent = stats.streak;
+            document.getElementById("stat-maxstreak").textContent = stats.maxStreak;
+
+            // Show sharing options only if game over or already solved today
+            const visualizer = document.getElementById("modal-share-visualizer");
+            const shareGrid = document.getElementById("share-grid-emojis");
+            
+            if (isGameOver && guessHistory.length > 0) {
+                visualizer.classList.remove("hidden");
+                shareGrid.innerHTML = "";
+                guessHistory.forEach(row => {
+                    const rowDiv = document.createElement("div");
+                    rowDiv.className = "text-lg tracking-widest text-center";
+                    rowDiv.textContent = row;
+                    shareGrid.appendChild(rowDiv);
+                });
+            } else {
+                visualizer.classList.add("hidden");
+            }
+
+            document.getElementById("modal-stats").classList.remove("hidden");
+        }
+
+        function copyResultsToClipboard() {
+            // Build the share string with custom header
+            let shareText = `Faroese Connections \uD83C\uDDEB\uD83C\uDDF4` + "\n";
+            if (isDailyMode) {
+                const today = new Date();
+                shareText += `${today.toLocaleDateString("en-US", { month: 'short', day: 'numeric', year: 'numeric' })}\n`;
+            } else {
+                shareText += `Practice Mode Puzzle\n`;
+            }
+            
+            const attemptCount = guessHistory.length;
+            const finalMistakes = 4 - mistakesRemaining;
+            const successIndicator = solvedCategories.length === 4 ? `Solved in ${attemptCount} attempts!` : `X/4 Categories`;
+            
+            shareText += `${successIndicator}\n\n`;
+            guessHistory.forEach(row => {
+                shareText += `${row}\n`;
+            });
+            shareText += `\nPlay here: ${window.location.href}`;
+
+            // Handle Clipboard API iframe safety fallback as outlined in prompt
+            const textArea = document.createElement("textarea");
+            textArea.value = shareText;
+            textArea.style.position = "fixed";  // Avoid scrolling down
+            document.body.appendChild(textArea);
+            textArea.focus();
+            textArea.select();
+            
+            try {
+                document.execCommand('copy');
+                const indicator = document.getElementById("share-copy-indicator");
+                indicator.classList.remove("hidden");
+                setTimeout(() => {
+                    indicator.classList.add("hidden");
+                }, 2500);
+            } catch (err) {
+                console.error("Unable to copy", err);
+            }
+            
+            document.body.removeChild(textArea);
+        }
+
+        const canvas = document.getElementById("confetti-canvas");
+        const ctx = canvas.getContext("2d");
+        let animationFrameId;
+        let particles = [];
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        class Particle {
+            constructor(x, y) {
+                this.x = x;
+                this.y = y;
+                this.size = Math.random() * 6 + 5;
+                this.color = ["#f59e0b", "#10b981", "#3b82f6", "#8b5cf6", "#ef4444"][Math.floor(Math.random() * 5)];
+                this.speedX = Math.random() * 6 - 3;
+                this.speedY = Math.random() * -15 - 5;
+                this.gravity = 0.45;
+                this.rotation = Math.random() * 360;
+                this.rotationSpeed = Math.random() * 4 - 2;
+                this.decay = Math.random() * 0.015 + 0.005;
+                this.opacity = 1.0;
+            }
+            update() {
+                this.speedY += this.gravity;
+                this.x += this.speedX;
+                this.y += this.speedY;
+                this.rotation += this.rotationSpeed;
+                this.opacity -= this.decay;
+            }
+            draw() {
+                ctx.save();
+                ctx.translate(this.x, this.y);
+                ctx.rotate((this.rotation * Math.PI) / 180);
+                ctx.globalAlpha = this.opacity;
+                ctx.fillStyle = this.color;
+                ctx.fillRect(-this.size / 2, -this.size / 2, this.size, this.size);
+                ctx.restore();
+            }
+        }
+
+        function animateConfetti() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            particles.forEach((p, i) => {
+                p.update();
+                p.draw();
+                if (p.opacity <= 0) {
+                    particles.splice(i, 1);
+                }
+            });
+            if (particles.length > 0) {
+                animationFrameId = requestAnimationFrame(animateConfetti);
+            } else {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                cancelAnimationFrame(animationFrameId);
+            }
+        }
+
+        function startConfettiEffect() {
+            // Shoot bursts from bottom left and bottom right
+            particles = [];
+            const count = 120;
+            for (let i = 0; i < count; i++) {
+                particles.push(new Particle(0, canvas.height));
+                particles.push(new Particle(canvas.width, canvas.height));
+            }
+            animateConfetti();
+        }
+
+        window.onload = async function () {
+            // Setup modals listeners
+            document.querySelectorAll(".close-modal").forEach(btn => {
+                btn.addEventListener("click", () => {
+                    document.getElementById("modal-help").classList.add("hidden");
+                    document.getElementById("modal-stats").classList.add("hidden");
+                    document.getElementById("modal-dictionary").classList.add("hidden");
+                });
+            });
+
+            document.getElementById("btn-help").addEventListener("click", () => {
+                document.getElementById("modal-help").classList.remove("hidden");
+            });
+
+            document.getElementById("btn-stats").addEventListener("click", () => {
+                showStatsModal();
+            });
+
+            document.getElementById("btn-dictionary").addEventListener("click", () => {
+                document.getElementById("modal-dictionary").classList.remove("hidden");
+            });
+
+            document.getElementById("btn-copy-share").addEventListener("click", () => {
+                copyResultsToClipboard();
+            });
+
+            // Action triggers
+            document.getElementById("btn-shuffle").addEventListener("click", shuffleBoard);
+            document.getElementById("btn-deselect").addEventListener("click", deselectAll);
+            document.getElementById("btn-submit").addEventListener("click", submitGuess);
+            
+            document.getElementById("btn-next-practice").addEventListener("click", () => {
+                initGame();
+            });
+
+            // Switch Daily vs Practice Modes
+            const btnDaily = document.getElementById("mode-daily");
+            const btnPractice = document.getElementById("mode-practice");
+
+            btnDaily.addEventListener("click", () => {
+                if (isDailyMode) return;
+                isDailyMode = true;
+                
+                // Toggle active style colors
+                btnDaily.className = "px-4 py-1.5 text-xs sm:text-sm font-semibold rounded-lg transition duration-200 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 shadow-sm";
+                btnPractice.className = "px-4 py-1.5 text-xs sm:text-sm font-semibold rounded-lg transition duration-200 text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200";
+                
+                initGame();
+            });
+
+            btnPractice.addEventListener("click", () => {
+                if (!isDailyMode) return;
+                isDailyMode = false;
+
+                // Toggle active style colors
+                btnPractice.className = "px-4 py-1.5 text-xs sm:text-sm font-semibold rounded-lg transition duration-200 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 shadow-sm";
+                btnDaily.className = "px-4 py-1.5 text-xs sm:text-sm font-semibold rounded-lg transition duration-200 text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200";
+
+                initGame();
+            });
+
+            const themeToggleBtn = document.getElementById("btn-theme-toggle");
+            const sunIcon = document.getElementById("theme-sun");
+            const moonIcon = document.getElementById("theme-moon");
+
+            // Check systems defaults or local settings
+            const savedTheme = localStorage.getItem("faroese-connections-theme");
+            if (savedTheme === "light" || (!savedTheme && !window.matchMedia("(prefers-color-scheme: dark)").matches)) {
+                document.documentElement.classList.remove("dark");
+                sunIcon.classList.add("hidden");
+                moonIcon.classList.remove("hidden");
+            } else {
+                document.documentElement.classList.add("dark");
+                sunIcon.classList.remove("hidden");
+                moonIcon.classList.add("hidden");
+            }
+
+            themeToggleBtn.addEventListener("click", () => {
+                if (document.documentElement.classList.contains("dark")) {
+                    document.documentElement.classList.remove("dark");
+                    localStorage.setItem("faroese-connections-theme", "light");
+                    sunIcon.classList.add("hidden");
+                    moonIcon.classList.remove("hidden");
+                } else {
+                    document.documentElement.classList.add("dark");
+                    localStorage.setItem("faroese-connections-theme", "dark");
+                    sunIcon.classList.remove("hidden");
+                    moonIcon.classList.add("hidden");
+                }
+            });
+
+            // Initialize game on window load after static JSON data is available.
+            try {
+                await loadGameData();
+                initGame();
+            } catch (error) {
+                showDataLoadError(error);
+            }
+        };
+    </script>
+</body>
+</html>
