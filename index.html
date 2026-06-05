@@ -175,7 +175,7 @@
     <!-- Footer credits -->
     <footer class="text-center py-6 border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 mt-12 transition-colors duration-300">
         <p class="text-xs text-slate-500 dark:text-slate-400">
-            Developed by <a href="https://www.smyrilline.fo/" target="_blank" rel="noopener noreferrer" class="font-semibold text-blue-600 dark:text-blue-400 hover:underline">Smyrilline</a> for travelers to learn about the Faroe Islands better.
+            Developed by <a href="https://www.smyrilline.fo/" target="_blank" rel="noopener noreferrer" class="font-semibold text-blue-600 dark:text-blue-400 hover:underline">Smyril Line</a> for travelers to learn about the Faroe Islands better.
         </p>
     </footer>
 
@@ -450,6 +450,18 @@
             document.getElementById("btn-submit").disabled = true;
         }
 
+        function hasDuplicateWords(categories) {
+            const seen = new Set();
+            for (const category of categories) {
+                for (const word of category.words) {
+                    const key = String(word).trim().toUpperCase();
+                    if (seen.has(key)) return true;
+                    seen.add(key);
+                }
+            }
+            return false;
+        }
+
         // Picks 4 categories: exactly 1 yellow, 1 green, 1 blue, 1 purple
         function selectFourCategories(seed) {
             const yellowPool = CATEGORIES_DATA.filter(c => c.difficulty === 'yellow');
@@ -457,28 +469,36 @@
             const bluePool = CATEGORIES_DATA.filter(c => c.difficulty === 'blue');
             const purplePool = CATEGORIES_DATA.filter(c => c.difficulty === 'purple');
 
-            let yellowIndex, greenIndex, blueIndex, purpleIndex;
+            let selected = [];
+            const useSeed = seed !== undefined && seed !== null;
 
-            if (seed) {
-                // Seeded randomized index pick
-                yellowIndex = Math.floor(pseudorandom(seed) * yellowPool.length);
-                greenIndex = Math.floor(pseudorandom(seed + 1) * greenPool.length);
-                blueIndex = Math.floor(pseudorandom(seed + 2) * bluePool.length);
-                purpleIndex = Math.floor(pseudorandom(seed + 3) * purplePool.length);
-            } else {
-                // Completely random index pick
-                yellowIndex = Math.floor(Math.random() * yellowPool.length);
-                greenIndex = Math.floor(Math.random() * greenPool.length);
-                blueIndex = Math.floor(Math.random() * bluePool.length);
-                purpleIndex = Math.floor(Math.random() * purplePool.length);
+            for (let attempt = 0; attempt < 500; attempt++) {
+                let yellowIndex, greenIndex, blueIndex, purpleIndex;
+
+                if (useSeed) {
+                    const offset = attempt * 4;
+                    yellowIndex = Math.floor(pseudorandom(seed + offset) * yellowPool.length);
+                    greenIndex = Math.floor(pseudorandom(seed + offset + 1) * greenPool.length);
+                    blueIndex = Math.floor(pseudorandom(seed + offset + 2) * bluePool.length);
+                    purpleIndex = Math.floor(pseudorandom(seed + offset + 3) * purplePool.length);
+                } else {
+                    yellowIndex = Math.floor(Math.random() * yellowPool.length);
+                    greenIndex = Math.floor(Math.random() * greenPool.length);
+                    blueIndex = Math.floor(Math.random() * bluePool.length);
+                    purpleIndex = Math.floor(Math.random() * purplePool.length);
+                }
+
+                selected = [
+                    yellowPool[yellowIndex],
+                    greenPool[greenIndex],
+                    bluePool[blueIndex],
+                    purplePool[purpleIndex]
+                ];
+
+                if (!hasDuplicateWords(selected)) return selected;
             }
 
-            return [
-                yellowPool[yellowIndex],
-                greenPool[greenIndex],
-                bluePool[blueIndex],
-                purplePool[purpleIndex]
-            ];
+            return selected;
         }
 
         function initGame() {
